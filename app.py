@@ -5,7 +5,8 @@ from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 
-# Load .env locally; on Streamlit Cloud, secrets are injected via st.secrets
+# Load .env locally only — secrets are NOT exposed in the UI.
+# Secrets (from .env or st.secrets) are reserved for the /api endpoint only.
 env_path = Path(__file__).parent / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=str(env_path))
@@ -14,12 +15,13 @@ else:
     if parent_env.exists():
         load_dotenv(dotenv_path=str(parent_env))
 
-# Bridge Streamlit Cloud secrets to env vars
-if hasattr(st, "secrets"):
-    for key in ("OPENROUTER_API_KEY", "SLACK_WEBHOOK_URL", "JIRA_URL",
-                "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_PROJECT_KEY"):
-        if key in st.secrets and key not in os.environ:
-            os.environ[key] = st.secrets[key]
+
+def _get_secret(key: str) -> str:
+    """Read a secret from st.secrets or env — for API use only, never pre-fill UI."""
+    try:
+        return st.secrets.get(key, os.getenv(key, ""))
+    except Exception:
+        return os.getenv(key, "")
 
 st.set_page_config(page_title="DevOps Incident Analyzer", page_icon="🔍", layout="wide")
 
@@ -45,11 +47,15 @@ with st.sidebar:
 
     openrouter_key = st.text_input(
         "OpenRouter API Key",
-        value=os.getenv("OPENROUTER_API_KEY", ""),
+        value="",
         type="password",
+        placeholder="Paste your OpenRouter API key",
+        help="Required. Your key is used only for this session and never stored.",
     )
     if openrouter_key:
         os.environ["OPENROUTER_API_KEY"] = openrouter_key
+    elif not os.getenv("OPENROUTER_API_KEY"):
+        st.warning("⚠️ Enter your API key to run analysis")
 
     st.markdown("---")
     st.markdown("### 📂 Directory Watcher")
@@ -103,28 +109,29 @@ with st.sidebar:
 
     slack_webhook = st.text_input(
         "Slack Webhook URL",
-        value=os.getenv("SLACK_WEBHOOK_URL", ""),
+        value="",
         type="password",
         disabled=slack_mock,
+        placeholder="https://hooks.slack.com/services/...",
     )
     if slack_webhook:
         os.environ["SLACK_WEBHOOK_URL"] = slack_webhook
 
     st.markdown("---")
     st.markdown("### 🎫 JIRA")
-    jira_url = st.text_input("JIRA URL", value=os.getenv("JIRA_URL", ""), disabled=jira_mock)
+    jira_url = st.text_input("JIRA URL", value="", disabled=jira_mock, placeholder="https://yourcompany.atlassian.net")
     if jira_url:
         os.environ["JIRA_URL"] = jira_url
 
-    jira_email = st.text_input("JIRA Email", value=os.getenv("JIRA_EMAIL", ""), disabled=jira_mock)
+    jira_email = st.text_input("JIRA Email", value="", disabled=jira_mock, placeholder="you@company.com")
     if jira_email:
         os.environ["JIRA_EMAIL"] = jira_email
 
-    jira_token = st.text_input("JIRA API Token", value=os.getenv("JIRA_API_TOKEN", ""), type="password", disabled=jira_mock)
+    jira_token = st.text_input("JIRA API Token", value="", type="password", disabled=jira_mock, placeholder="Paste JIRA API token")
     if jira_token:
         os.environ["JIRA_API_TOKEN"] = jira_token
 
-    jira_project = st.text_input("JIRA Project Key", value=os.getenv("JIRA_PROJECT_KEY", "OPS"), disabled=jira_mock)
+    jira_project = st.text_input("JIRA Project Key", value="OPS", disabled=jira_mock)
     if jira_project:
         os.environ["JIRA_PROJECT_KEY"] = jira_project
 
@@ -184,7 +191,11 @@ if raw_logs:
 # ---------------------------------------------------------------------------
 # Analysis
 # ---------------------------------------------------------------------------
-if raw_logs and st.button("🚀 Analyze Incidents", type="primary", use_container_width=True):
+has_api_key = bool(os.getenv("OPENROUTER_API_KEY"))
+if raw_logs and not has_api_key:
+    st.warning("Enter your OpenRouter API key in the sidebar to run analysis.")
+
+if raw_logs and has_api_key and st.button("🚀 Analyze Incidents", type="primary", use_container_width=True):
     from graph import build_incident_graph
 
     initial_state = {
