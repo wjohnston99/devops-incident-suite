@@ -49,8 +49,12 @@ devops-incident-suite/
 │   ├── test_watcher.py     # Directory watcher tests
 │   ├── test_agents.py      # Agent node + LLM mock tests
 │   └── test_graph.py       # Graph compilation + pipeline tests
-├── generate_report.py      # PDF report generator (reportlab)
-├── generate_slides.py      # Slide deck generator (python-pptx)
+├── docs/                   # Documentation & generated reports
+│   ├── generate_report.py  # PDF report generator (reportlab)
+│   ├── generate_slides.py  # Slide deck generator (python-pptx)
+│   ├── architecture_diagram.png
+│   ├── DevOps_Incident_Suite_Project_Report.pdf
+│   └── DevOps_Incident_Suite_Presentation.pptx
 ├── requirements.txt        # Python dependencies
 ├── .env.example            # Environment variable template
 └── .streamlit/
