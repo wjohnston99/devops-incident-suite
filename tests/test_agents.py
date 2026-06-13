@@ -85,46 +85,52 @@ class TestLazyLLM:
     @patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key-for-llm"})
     @patch("agents.ChatOpenAI")
     def test_get_llm_creates_default_mode(self, mock_chat):
-        from agents import _get_llm, _llm_cache
-        _llm_cache.clear()
+        import agents as _agents_mod
+        _agents_mod._llm_cache.clear()
+        _agents_mod._llm_cache_key = None
 
         mock_chat.return_value = MagicMock()
-        result = _get_llm(json_mode=False)
+        result = _agents_mod._get_llm(json_mode=False)
 
         mock_chat.assert_called_once()
         call_kwargs = mock_chat.call_args[1]
         assert call_kwargs["model"] == "openai/gpt-4o"
         assert call_kwargs["temperature"] == 0
         assert "model_kwargs" not in call_kwargs
-        _llm_cache.clear()
+        _agents_mod._llm_cache.clear()
+        _agents_mod._llm_cache_key = None
 
     @patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key-for-llm"})
     @patch("agents.ChatOpenAI")
     def test_get_llm_creates_json_mode(self, mock_chat):
-        from agents import _get_llm, _llm_cache
-        _llm_cache.clear()
+        import agents as _agents_mod
+        _agents_mod._llm_cache.clear()
+        _agents_mod._llm_cache_key = None
 
         mock_chat.return_value = MagicMock()
-        result = _get_llm(json_mode=True)
+        result = _agents_mod._get_llm(json_mode=True)
 
         mock_chat.assert_called_once()
         call_kwargs = mock_chat.call_args[1]
         assert call_kwargs["model_kwargs"] == {"response_format": {"type": "json_object"}}
-        _llm_cache.clear()
+        _agents_mod._llm_cache.clear()
+        _agents_mod._llm_cache_key = None
 
     @patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key-for-llm"})
     @patch("agents.ChatOpenAI")
     def test_get_llm_caches_instance(self, mock_chat):
-        from agents import _get_llm, _llm_cache
-        _llm_cache.clear()
+        import agents as _agents_mod
+        _agents_mod._llm_cache.clear()
+        _agents_mod._llm_cache_key = None
 
         mock_chat.return_value = MagicMock()
-        result1 = _get_llm(json_mode=False)
-        result2 = _get_llm(json_mode=False)
+        result1 = _agents_mod._get_llm(json_mode=False)
+        result2 = _agents_mod._get_llm(json_mode=False)
 
         assert result1 is result2
         assert mock_chat.call_count == 1
-        _llm_cache.clear()
+        _agents_mod._llm_cache.clear()
+        _agents_mod._llm_cache_key = None
 
 
 # ---------------------------------------------------------------------------
