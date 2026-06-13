@@ -1,6 +1,9 @@
 import os
+import sys
 import json
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
 
 import streamlit as st
 from dotenv import load_dotenv
