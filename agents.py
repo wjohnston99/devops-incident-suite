@@ -16,20 +16,32 @@ else:
     if parent_env.exists():
         load_dotenv(dotenv_path=str(parent_env))
 
-LLM = ChatOpenAI(
-    model="openai/gpt-4o",
-    openai_api_key=os.getenv("OPENROUTER_API_KEY"),
-    openai_api_base="https://openrouter.ai/api/v1",
-    temperature=0,
-)
+_llm_cache = {}
 
-LLM_JSON = ChatOpenAI(
-    model="openai/gpt-4o",
-    openai_api_key=os.getenv("OPENROUTER_API_KEY"),
-    openai_api_base="https://openrouter.ai/api/v1",
-    temperature=0,
-    model_kwargs={"response_format": {"type": "json_object"}},
-)
+def _get_llm(json_mode=False):
+    key = "json" if json_mode else "default"
+    if key not in _llm_cache:
+        kwargs = dict(
+            model="openai/gpt-4o",
+            openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+            openai_api_base="https://openrouter.ai/api/v1",
+            temperature=0,
+        )
+        if json_mode:
+            kwargs["model_kwargs"] = {"response_format": {"type": "json_object"}}
+        _llm_cache[key] = ChatOpenAI(**kwargs)
+    return _llm_cache[key]
+
+
+class _LazyLLM:
+    def __init__(self, json_mode=False):
+        self._json_mode = json_mode
+    def invoke(self, *args, **kwargs):
+        return _get_llm(self._json_mode).invoke(*args, **kwargs)
+
+
+LLM = _LazyLLM(json_mode=False)
+LLM_JSON = _LazyLLM(json_mode=True)
 
 SCHEMA_SAMPLE_LINES = 15
 LOG_CHUNK_SIZE = 100
