@@ -8,11 +8,12 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from state import IncidentState
 from tools import send_slack_message, create_jira_ticket, route_to_channel
 
-env_path = Path(__file__).parent / ".env"
+_project_root = Path(__file__).parent.parent
+env_path = _project_root / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=str(env_path))
 else:
-    parent_env = Path(__file__).parent.parent / ".env"
+    parent_env = _project_root.parent / ".env"
     if parent_env.exists():
         load_dotenv(dotenv_path=str(parent_env))
 

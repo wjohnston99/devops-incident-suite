@@ -611,14 +611,14 @@ def build():
                     "Framework-agnostic core + Streamlit UI")
 
     files = [
-        ("app.py", "Streamlit UI entry point", GREEN),
-        ("state.py", "IncidentState TypedDict (shared state)", BLUE),
-        ("agents.py", "5 agent node functions + lazy LLM", PURPLE),
-        ("graph.py", "LangGraph StateGraph wiring", INDIGO),
-        ("tools.py", "@tool wrappers (Slack, JIRA) + routing", PINK),
-        ("watcher.py", "Directory watcher (watchdog)", AMBER),
-        ("log_samples/", "4 synthetic log files (IOS, CEF, RFC5424, tabular)", MID_GRAY),
-        ("test_*.py", "81 unit tests (pytest)", RED),
+        ("src/app.py", "Streamlit UI entry point", GREEN),
+        ("src/state.py", "IncidentState TypedDict (shared state)", BLUE),
+        ("src/agents.py", "5 agent node functions + lazy LLM", PURPLE),
+        ("src/graph.py", "LangGraph StateGraph wiring", INDIGO),
+        ("src/tools.py", "@tool wrappers (Slack, JIRA) + routing", PINK),
+        ("src/watcher.py", "Directory watcher (watchdog)", AMBER),
+        ("src/log_samples/", "4 synthetic log files (IOS, CEF, RFC5424, tabular)", MID_GRAY),
+        ("tests/test_*.py", "81 unit tests (pytest)", RED),
     ]
 
     for i, (fname, desc, color) in enumerate(files):

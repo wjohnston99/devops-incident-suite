@@ -7,11 +7,12 @@ from dotenv import load_dotenv
 
 # Load .env locally only — secrets are NOT exposed in the UI.
 # Secrets (from .env or st.secrets) are reserved for the /api endpoint only.
-env_path = Path(__file__).parent / ".env"
+_project_root = Path(__file__).parent.parent
+env_path = _project_root / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=str(env_path))
 else:
-    parent_env = Path(__file__).parent.parent / ".env"
+    parent_env = _project_root.parent / ".env"
     if parent_env.exists():
         load_dotenv(dotenv_path=str(parent_env))
 
@@ -60,7 +61,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 📂 Directory Watcher")
 
-    default_watch = os.path.join(os.path.dirname(__file__), "watched_logs")
+    default_watch = str(_project_root / "watched_logs")
     watch_dir = st.text_input("Watch directory", value=default_watch)
 
     col_w1, col_w2 = st.columns(2)
@@ -163,7 +164,7 @@ with col3:
 
 # Gather log content — persist in session state so it survives reruns
 if use_samples:
-    sample_dir = Path(__file__).parent / "log_samples"
+    sample_dir = Path(__file__).parent / "log_samples"  # log_samples is inside src/
     loaded = {}
     for f in sample_dir.glob("*.log"):
         loaded[f.name] = f.read_text()

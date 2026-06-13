@@ -28,28 +28,33 @@ The core pipeline (`state.py`, `agents.py`, `graph.py`, `tools.py`) has zero Str
 
 ```
 devops-incident-suite/
-├── app.py                # Streamlit UI entry point
-├── state.py              # IncidentState TypedDict (shared state)
-├── agents.py             # 5 agent node functions + lazy LLM
-├── graph.py              # LangGraph StateGraph wiring
-├── tools.py              # @tool wrappers (Slack, JIRA) + channel routing
-├── watcher.py            # Directory watcher (watchdog)
-├── log_samples/          # Synthetic test logs
-│   ├── routers.log       # Cisco IOS syslog format
-│   ├── switches.log      # Structured tabular format
-│   ├── security.log      # CEF (Common Event Format)
-│   └── servers.log       # RFC5424 syslog format
-├── test_state.py         # State schema tests
-├── test_tools.py         # Channel routing, Slack, JIRA tests
-├── test_watcher.py       # Directory watcher tests
-├── test_agents.py        # Agent node + LLM mock tests
-├── test_graph.py         # Graph compilation + pipeline tests
-├── conftest.py           # pytest configuration
-├── generate_report.py    # PDF report generator (reportlab)
-├── generate_slides.py    # Slide deck generator (python-pptx)
-├── requirements.txt      # Python dependencies
+├── src/                    # Application source code
+│   ├── __init__.py
+│   ├── app.py              # Streamlit UI entry point
+│   ├── state.py            # IncidentState TypedDict (shared state)
+│   ├── agents.py           # 5 agent node functions + lazy LLM
+│   ├── graph.py            # LangGraph StateGraph wiring
+│   ├── tools.py            # @tool wrappers (Slack, JIRA) + channel routing
+│   ├── watcher.py          # Directory watcher (watchdog)
+│   └── log_samples/        # Synthetic test logs
+│       ├── routers.log     # Cisco IOS syslog format
+│       ├── switches.log    # Structured tabular format
+│       ├── security.log    # CEF (Common Event Format)
+│       └── servers.log     # RFC5424 syslog format
+├── tests/                  # Unit tests (pytest)
+│   ├── __init__.py
+│   ├── conftest.py         # pytest path configuration
+│   ├── test_state.py       # State schema tests
+│   ├── test_tools.py       # Channel routing, Slack, JIRA tests
+│   ├── test_watcher.py     # Directory watcher tests
+│   ├── test_agents.py      # Agent node + LLM mock tests
+│   └── test_graph.py       # Graph compilation + pipeline tests
+├── generate_report.py      # PDF report generator (reportlab)
+├── generate_slides.py      # Slide deck generator (python-pptx)
+├── requirements.txt        # Python dependencies
+├── .env.example            # Environment variable template
 └── .streamlit/
-    └── config.toml       # Streamlit theme configuration
+    └── config.toml         # Streamlit theme configuration
 ```
 
 ## Setup
@@ -92,7 +97,7 @@ JIRA_PROJECT_KEY=OPS
 ### Run the App
 
 ```bash
-streamlit run app.py
+streamlit run src/app.py
 ```
 
 1. Enter your OpenRouter API key in the sidebar
@@ -103,8 +108,8 @@ streamlit run app.py
 ### Verify Imports
 
 ```bash
-python -c "from state import IncidentState; print('state OK')"
-python -c "from graph import build_incident_graph; g = build_incident_graph(); print('graph OK')"
+PYTHONPATH=src python -c "from state import IncidentState; print('state OK')"
+PYTHONPATH=src python -c "from graph import build_incident_graph; g = build_incident_graph(); print('graph OK')"
 ```
 
 ## Testing
@@ -112,14 +117,13 @@ python -c "from graph import build_incident_graph; g = build_incident_graph(); p
 ### Run All Tests
 
 ```bash
-python -m pytest test_state.py test_tools.py test_watcher.py test_agents.py test_graph.py -v --tb=short
+python -m pytest tests/ -v --tb=short
 ```
 
 ### Run Tests with Code Coverage
 
 ```bash
-python -m pytest test_state.py test_tools.py test_watcher.py test_agents.py test_graph.py \
-  -v --tb=short \
+python -m pytest tests/ -v --tb=short \
   --cov=state --cov=tools --cov=watcher --cov=agents --cov=graph \
   --cov-report=term-missing
 ```
@@ -127,7 +131,7 @@ python -m pytest test_state.py test_tools.py test_watcher.py test_agents.py test
 ### Generate HTML Coverage Report
 
 ```bash
-python -m pytest test_state.py test_tools.py test_watcher.py test_agents.py test_graph.py \
+python -m pytest tests/ \
   --cov=state --cov=tools --cov=watcher --cov=agents --cov=graph \
   --cov-report=html
 open htmlcov/index.html
@@ -182,7 +186,7 @@ Deployed on [Streamlit Cloud](https://share.streamlit.io):
 
 1. Sign in to share.streamlit.io with GitHub
 2. Click **New app** → select `devops-incident-suite` repo
-3. Branch: `main` | Main file: `app.py`
+3. Branch: `main` | Main file: `src/app.py`
 4. No secrets required (users enter their own API keys)
 5. Click **Deploy**
 

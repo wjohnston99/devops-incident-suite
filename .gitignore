@@ -9,3 +9,4 @@ watched_logs/
 dist/
 build/
 .streamlit/secrets.toml
+.env
